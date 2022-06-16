@@ -23,7 +23,7 @@ namespace BulletHell
             
             _lateSystems = new List<SystemBase>
             {
-                World.DefaultGameObjectInjectionWorld.GetOrCreateSystem<QuadRendererSystem>()
+                
             };
 
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
