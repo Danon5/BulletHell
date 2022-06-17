@@ -27,7 +27,7 @@ namespace BulletHell.ECS.Systems
         {
             int ppu = _gameData.ppu;
             EntityCommandBuffer commandBuffer = _endSimulationEntityCommandBufferSystem.CreateCommandBuffer();
-            
+
             Entities.ForEach((
                 Entity entity,
                 ref QuadRendererComponent quadRenderer,

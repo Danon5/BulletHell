@@ -182,3 +182,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   ppu: 16
   playerPrefab: {fileID: 8019049302812771780, guid: 6b2f84243944b3f4d9d31fb203bb6635, type: 3}
+  enemyPrefab: {fileID: 201557453455103277, guid: e8831a13b9e62984aa88c9c6f02d87e9, type: 3}
