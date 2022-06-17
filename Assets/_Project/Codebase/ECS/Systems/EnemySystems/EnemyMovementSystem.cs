@@ -30,7 +30,7 @@ namespace BulletHell.ECS.Systems.EnemySystems
                 float2 dirToTarget = math.normalizesafe(aggroTargetTranslation.Value.xy - translation.Value.xy);
                 movement.velocity = dirToTarget * movement.speed;
                 translation.Value += new float3(movement.velocity.x, movement.velocity.y, 0f) * GameConstants.TARGET_TIMESTEP;
-            }).Run();
+            }).ScheduleParallel();
 
             aggroTargets.Dispose();
         }

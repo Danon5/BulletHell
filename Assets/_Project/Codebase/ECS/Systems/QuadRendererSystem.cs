@@ -27,6 +27,7 @@ namespace BulletHell.ECS.Systems
         {
             int ppu = _gameData.ppu;
             EntityCommandBuffer commandBuffer = _endSimulationEntityCommandBufferSystem.CreateCommandBuffer();
+            EntityCommandBuffer.ParallelWriter parallelWriter = commandBuffer.AsParallelWriter();
 
             Entities.ForEach((
                 Entity entity,
@@ -38,12 +39,15 @@ namespace BulletHell.ECS.Systems
                 quadRenderer.textureDimensions = new int2(mainTex.width, mainTex.height);
                 
                 commandBuffer.RemoveComponent<QuadRendererRequiresTextureDimensionsUpdateTag>(entity);
+                commandBuffer.AddComponent<QuadRendererRequiresRescaleTag>(entity);
             }).WithoutBurst().Run();
 
             Entities.ForEach((
+                int entityInQueryIndex,
                 Entity entity,
-                ref LocalToWorld localToWorld,
-                in QuadRendererComponent quadRenderer) =>
+                ref NonUniformScale scale,
+                in QuadRendererComponent quadRenderer,
+                in QuadRendererRequiresRescaleTag quadRendererRequiresRescaleTag) =>
             {
                 float3 newScale = new float3
                 {
@@ -52,11 +56,12 @@ namespace BulletHell.ECS.Systems
                     z = 1f
                 };
 
-                localToWorld.Value = float4x4.TRS(
-                    localToWorld.Position,
-                    localToWorld.Rotation,
-                    newScale);
-            }).Run();
+                scale.Value = newScale;
+                
+                parallelWriter.RemoveComponent<QuadRendererRequiresRescaleTag>(entityInQueryIndex, entity);
+            }).ScheduleParallel();
+            
+            _endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(Dependency);
         }
     }
 }

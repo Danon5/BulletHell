@@ -6,5 +6,6 @@ namespace BulletHell.ECS.Components
     public struct FlipXComponent : IComponentData
     {
         public Entity graphicsEntity;
+        public bool flipped;
     }
 }

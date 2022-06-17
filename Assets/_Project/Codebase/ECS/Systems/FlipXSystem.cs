@@ -7,27 +7,41 @@ namespace BulletHell.ECS.Systems
 {
     public partial class FlipXSystem : SystemBase
     {
+        private EndSimulationEntityCommandBufferSystem _endSimulationEntityCommandBufferSystem;
+
+        protected override void OnStartRunning()
+        {
+            _endSimulationEntityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
+        }
+
         protected override void OnUpdate()
         {
+            EntityCommandBuffer.ParallelWriter parallelWriter = 
+                _endSimulationEntityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
+
             Entities.ForEach((
-                in FlipXComponent flipX,
+                int entityInQueryIndex,
+                ref FlipXComponent flipX,
                 in MovementComponent playerMovement) =>
             {
                 float xVel = playerMovement.velocity.x;
 
-                if (math.abs(xVel) > .01)
+                if (math.abs(xVel) <= .01) return;
+
+                bool shouldBeFlipped = xVel < 0f;
+
+                if (shouldBeFlipped == flipX.flipped) return;
+
+                NonUniformScale newScale = new NonUniformScale
                 {
-                    LocalToParent localToParent = EntityManager.GetComponentData<LocalToParent>(flipX.graphicsEntity);
-                    
-                    float4x4 translationMatrix = float4x4.TRS(
-                        localToParent.Position,
-                        quaternion.identity, 
-                        new float3(xVel < 0f ? -1f : 1f, 1f, 1f));
-                    localToParent.Value = translationMatrix;
-                    
-                    EntityManager.SetComponentData(flipX.graphicsEntity, localToParent);
-                }
-            }).WithoutBurst().Run();
+                    Value = new float3(shouldBeFlipped ? -1f : 1f, 1f, 1f)
+                };
+
+                flipX.flipped = shouldBeFlipped;
+                parallelWriter.SetComponent(entityInQueryIndex, flipX.graphicsEntity, newScale);
+            }).ScheduleParallel();
+            
+            _endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(Dependency);
         }
     }
 }

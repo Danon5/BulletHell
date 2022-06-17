@@ -1,6 +1,9 @@
 ﻿using BulletHell.ECS.Components.Singletons;
 using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Transforms;
 using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace BulletHell
 {
@@ -12,7 +15,7 @@ namespace BulletHell
         {
             Application.targetFrameRate = GameConstants.TARGET_FRAMERATE;
             QualitySettings.vSyncCount = 0;
-            
+
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
             Entity gameDataEntity = _entityManager.CreateEntityQuery(
@@ -21,7 +24,19 @@ namespace BulletHell
             GameDataSingletonComponent gameData = _entityManager.GetComponentData<GameDataSingletonComponent>(gameDataEntity);  
 
             _entityManager.Instantiate(gameData.playerPrefab);
-            _entityManager.Instantiate(gameData.enemyPrefab);
+
+            for (int i = 0; i < 1000; i++)
+            {
+                Entity enemy = _entityManager.Instantiate(gameData.enemyPrefab);
+                _entityManager.SetComponentData(enemy, new Translation
+                {
+                    Value = new float3
+                    {
+                        x = Random.Range(-50f, 50f),
+                        y = Random.Range(-50f, 50f)
+                    }
+                });
+            }
         }
     }
 }

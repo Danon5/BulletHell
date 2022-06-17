@@ -19,7 +19,7 @@ namespace BulletHell.ECS.Systems.PlayerSystems
             {
                 movement.velocity = moveAxis * movement.speed;
                 translation.Value += new float3(movement.velocity.x, movement.velocity.y, 0f) * GameConstants.TARGET_TIMESTEP;
-            }).Run();
+            }).ScheduleParallel();
         }
     }
 }
