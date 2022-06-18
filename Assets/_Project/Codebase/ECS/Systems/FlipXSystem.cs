@@ -5,6 +5,7 @@ using Unity.Transforms;
 
 namespace BulletHell.ECS.Systems
 {
+    [UpdateAfter(typeof(PhysicsMovementSystem))]
     public partial class FlipXSystem : SystemBase
     {
         private EndSimulationEntityCommandBufferSystem _endSimulationEntityCommandBufferSystem;
@@ -32,13 +33,13 @@ namespace BulletHell.ECS.Systems
 
                 if (shouldBeFlipped == flipX.flipped) return;
 
-                NonUniformScale newScale = new NonUniformScale
+                Rotation newRotation = new Rotation
                 {
-                    Value = new float3(shouldBeFlipped ? -1f : 1f, 1f, 1f)
+                    Value = new quaternion(0f, shouldBeFlipped ? 1f : 0f, 0f, 1f)
                 };
 
                 flipX.flipped = shouldBeFlipped;
-                parallelWriter.SetComponent(entityInQueryIndex, flipX.graphicsEntity, newScale);
+                parallelWriter.SetComponent(entityInQueryIndex, flipX.spriteEntity, newRotation);
             }).ScheduleParallel();
             
             _endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(Dependency);

@@ -2,13 +2,8 @@
 
 namespace BulletHell.ECS.Systems
 {
-    public partial class AnimatedQuadRendererSystem : SystemBase
+    public partial class SpriteRenderSystem : SystemBase
     {
-        protected override void OnCreate()
-        {
-            
-        }
-
         protected override void OnUpdate()
         {
             

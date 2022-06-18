@@ -55,6 +55,7 @@
       <Path>Library/PackageCache/com.unity.modules.wind@1.0.0</Path>
       <Path>Library/PackageCache/com.unity.modules.xr@1.0.0</Path>
       <Path>Library/PackageCache/com.unity.nuget.mono-cecil@1.10.1</Path>
+      <Path>Library/PackageCache/com.unity.physics@0.51.0-preview.32</Path>
       <Path>Library/PackageCache/com.unity.platforms@0.51.0-preview.31</Path>
       <Path>Library/PackageCache/com.unity.profiling.core@1.0.0</Path>
       <Path>Library/PackageCache/com.unity.properties.ui@1.7.0-preview</Path>
@@ -80,7 +81,6 @@
       <Path>.idea</Path>
       <Path>Library</Path>
       <Path>Logs</Path>
-      <Path>Temp</Path>
       <Path>UserSettings</Path>
       <Path>obj</Path>
     </explicitExcludes>

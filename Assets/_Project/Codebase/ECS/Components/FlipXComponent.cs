@@ -5,7 +5,7 @@ namespace BulletHell.ECS.Components
     [GenerateAuthoringComponent]
     public struct FlipXComponent : IComponentData
     {
-        public Entity graphicsEntity;
+        public Entity spriteEntity;
         public bool flipped;
     }
 }

@@ -1,11 +1,11 @@
 ﻿using BulletHell.ECS.Components;
 using Unity.Entities;
-using Unity.Mathematics;
 using Unity.Transforms;
 using UnityEngine;
 
 namespace BulletHell.ECS.Systems.PlayerSystems
 {
+    [UpdateBefore(typeof(PhysicsMovementSystem))]
     public partial class PlayerMovementSystem : SystemBase
     {
         protected override void OnUpdate()
@@ -18,7 +18,6 @@ namespace BulletHell.ECS.Systems.PlayerSystems
                 in PlayerComponent player) =>
             {
                 movement.velocity = moveAxis * movement.speed;
-                translation.Value += new float3(movement.velocity.x, movement.velocity.y, 0f) * GameConstants.TARGET_TIMESTEP;
             }).ScheduleParallel();
         }
     }
