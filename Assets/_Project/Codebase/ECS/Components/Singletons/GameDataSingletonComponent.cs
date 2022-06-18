@@ -10,5 +10,6 @@ namespace BulletHell.ECS.Components.Singletons
         // PREFABS
         public Entity playerPrefab;
         public Entity enemyPrefab;
+        public Entity testPrefab;
     }
 }

@@ -1,27 +1,64 @@
-﻿using Unity.Entities;
+﻿using BulletHell.ECS.Components;
+using Unity.Collections;
+using Unity.Entities;
+using Unity.Mathematics;
+using Unity.Transforms;
 using UnityEngine;
 
 namespace BulletHell.ECS.Systems
 {
     public partial class SpriteRenderSystem : SystemBase
     {
+        private const int BATCH_SIZE = 1023;
+        
         private Mesh _quad;
 
-        private Matrix4x4[] _matrices;
-        
         protected override void OnCreate()
         {
             _quad = CreateQuad(1f, 1f);
-            _matrices = new Matrix4x4[1000];
         }
 
         protected override void OnUpdate()
         {
-            _matrices[0] = Matrix4x4.TRS(
-                new Vector3(Mathf.Sin((float) Time.ElapsedTime), Mathf.Sin((float) Time.ElapsedTime), 0f),
-                Quaternion.identity,
-                Vector3.one);
-            Graphics.DrawMeshInstanced(_quad, 0, GameAssets.TestMaterial, _matrices, 1);
+            int spriteCount = EntityManager.CreateEntityQuery(
+                typeof(SpriteComponent),
+                typeof(LocalToWorld)).CalculateEntityCount();
+            
+            NativeArray<Matrix4x4> matrices = new NativeArray<Matrix4x4>(spriteCount, Allocator.Temp);
+
+            float time = (float) Time.ElapsedTime;
+            
+            Entities.ForEach((
+                ref Translation translation,
+                in SpriteComponent sprite) =>
+            {
+                translation.Value += new float3(
+                    math.sin(time) * GameConstants.TARGET_TIMESTEP,
+                    math.sin(time) * GameConstants.TARGET_TIMESTEP,
+                    0f);
+            }).Run();
+            
+            Entities.ForEach((
+                int entityInQueryIndex,
+                in SpriteComponent sprite,
+                in LocalToWorld localToWorld) =>
+            {
+                matrices[entityInQueryIndex] = localToWorld.Value;
+            }).Run();
+
+            Matrix4x4[] drawMatrices = new Matrix4x4[BATCH_SIZE];
+
+            for (int i = 0; i < spriteCount; i += BATCH_SIZE)
+            {
+                int count = math.min(spriteCount - i, BATCH_SIZE);
+                
+                NativeArray<Matrix4x4>.Copy(matrices, i, drawMatrices, 0, count);
+                
+                Graphics.DrawMeshInstanced(_quad, 0, GameAssets.TestMaterial, 
+                    drawMatrices, count);
+            }
+
+            matrices.Dispose();
         }
 
         private static Mesh CreateQuad(float width, float height)
