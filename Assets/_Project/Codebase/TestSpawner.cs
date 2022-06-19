@@ -29,7 +29,7 @@ namespace BulletHell
                 
                 entityManager.SetComponentData(entity, new SpriteComponent
                 {
-                    uvRangeAndOffset = new float4(1f, 1f, 0f, 0f)
+                    uvScaleAndOffset = new float4(1f, 1f, 0f, 0f)
                 });
                 
                 entityManager.SetSharedComponentData(entity, new SpriteSharedData

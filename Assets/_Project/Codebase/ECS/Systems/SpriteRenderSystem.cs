@@ -16,10 +16,10 @@ namespace BulletHell.ECS.Systems
         private const int BATCH_SIZE = 1023;
 
         private static readonly int _HashMainTex = Shader.PropertyToID("_MainTex");
-        private static readonly int _HashUvRangeAndOffset = Shader.PropertyToID("_UvRangeAndOffset");
+        private static readonly int _HashUvScaleAndOffset = Shader.PropertyToID("_UvScaleAndOffset");
         
         private readonly Matrix4x4[] _batchMatrixCache = new Matrix4x4[BATCH_SIZE];
-        private readonly Vector4[] _batchUvRangeAndOffsetCache = new Vector4[BATCH_SIZE]; 
+        private readonly Vector4[] _batchUvScaleAndOffsetCache = new Vector4[BATCH_SIZE]; 
         private readonly Dictionary<SpriteSharedData, Mesh> _batchMeshCache = new Dictionary<SpriteSharedData, Mesh>();
         private readonly Dictionary<SpriteSharedData, Material> _batchMaterialCache = new Dictionary<SpriteSharedData, Material>();
         private readonly List<SpriteSharedData> _uniqueSpriteData = new List<SpriteSharedData>();
@@ -55,7 +55,7 @@ namespace BulletHell.ECS.Systems
                     : _batchMaterialCache[uniqueSpriteData];
 
                 NativeArray<Matrix4x4> matrices = new NativeArray<Matrix4x4>(entitiesWithUniqueSpriteCount, Allocator.Temp);
-                NativeArray<Vector4> uvRanges = new NativeArray<Vector4>(entitiesWithUniqueSpriteCount, Allocator.Temp);
+                NativeArray<Vector4> uvScaleAndOffsets = new NativeArray<Vector4>(entitiesWithUniqueSpriteCount, Allocator.Temp);
 
                 Entities.WithSharedComponentFilter(uniqueSpriteData).ForEach((
                     int entityInQueryIndex,
@@ -63,23 +63,24 @@ namespace BulletHell.ECS.Systems
                     in LocalToWorld localToWorld) =>
                 {
                     matrices[entityInQueryIndex] = localToWorld.Value;
-                    uvRanges[entityInQueryIndex] = sprite.uvRangeAndOffset;
+                    uvScaleAndOffsets[entityInQueryIndex] = sprite.uvScaleAndOffset;
                 }).Run();
-
-                NativeArray<Matrix4x4>.Copy(matrices, 0, _batchMatrixCache, 0, entitiesWithUniqueSpriteCount);
-                NativeArray<Vector4>.Copy(uvRanges, 0, _batchUvRangeAndOffsetCache, 0, entitiesWithUniqueSpriteCount);
-
-                MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
-                materialPropertyBlock.SetVectorArray(_HashUvRangeAndOffset, _batchUvRangeAndOffsetCache);
                 
                 for (int j = 0; j < entitiesWithUniqueSpriteCount; j += BATCH_SIZE)
                 {
                     int count = math.min(entitiesWithUniqueSpriteCount - j, BATCH_SIZE);
+                    
+                    NativeArray<Matrix4x4>.Copy(matrices, j, _batchMatrixCache, 0, count);
+                    NativeArray<Vector4>.Copy(uvScaleAndOffsets, j, _batchUvScaleAndOffsetCache, 0, count);
+
+                    MaterialPropertyBlock materialPropertyBlock = new MaterialPropertyBlock();
+                    materialPropertyBlock.SetVectorArray(_HashUvScaleAndOffset, _batchUvScaleAndOffsetCache);
+
                     Graphics.DrawMeshInstanced(mesh, 0, material, _batchMatrixCache, count, materialPropertyBlock);
                 }
                 
                 matrices.Dispose();
-                uvRanges.Dispose();
+                uvScaleAndOffsets.Dispose();
             }
             
             _uniqueSpriteData.Clear();

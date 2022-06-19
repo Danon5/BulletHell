@@ -36,7 +36,7 @@ Shader "Custom/EntityShader"
             sampler2D _MainTex;
 
             UNITY_INSTANCING_BUFFER_START(Props)
-                UNITY_DEFINE_INSTANCED_PROP(fixed4, _UvRangeAndOffset)
+                UNITY_DEFINE_INSTANCED_PROP(fixed4, _UvScaleAndOffset)
             UNITY_INSTANCING_BUFFER_END(Props)
 
             v2f vert (appdata v)
@@ -47,8 +47,8 @@ Shader "Custom/EntityShader"
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
                 
                 o.vertex = UnityObjectToClipPos(v.vertex);
-                o.uv = v.uv * UNITY_ACCESS_INSTANCED_PROP(Props, _UvRangeAndOffset).xy +
-                    UNITY_ACCESS_INSTANCED_PROP(Props, _UvRangeAndOffset).zw;
+                o.uv = v.uv * UNITY_ACCESS_INSTANCED_PROP(Props, _UvScaleAndOffset).xy +
+                    UNITY_ACCESS_INSTANCED_PROP(Props, _UvScaleAndOffset).zw;
                 return o;
             }
 
