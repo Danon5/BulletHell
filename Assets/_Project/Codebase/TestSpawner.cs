@@ -27,6 +27,11 @@ namespace BulletHell
                 entityManager.AddComponent<SpriteComponent>(entity);
                 entityManager.AddComponent<SpriteSharedData>(entity);
                 
+                entityManager.SetComponentData(entity, new SpriteComponent
+                {
+                    uvRangeAndOffset = new float4(1f, 1f, 0f, 0f)
+                });
+                
                 entityManager.SetSharedComponentData(entity, new SpriteSharedData
                 {
                     textureId = (TextureId) Random.Range(0, 5)

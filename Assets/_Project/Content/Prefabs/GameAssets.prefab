@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cca8c31d080948b5827173d1c6e96add, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _testMaterial: {fileID: 2100000, guid: 934f6572764d7be449ae768addc5cef0, type: 2}
+  _testMaterial: {fileID: 2100000, guid: e4d10f93bd142d24bb0197f3747afd83, type: 2}
   _textureLookups:
   - <TextureId>k__BackingField: 0
     <Texture>k__BackingField: {fileID: 2800000, guid: d4de1a03aafafa64f9c8d928379448ad, type: 3}
