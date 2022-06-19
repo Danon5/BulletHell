@@ -1,13 +1,13 @@
 #if UNITY_EDITOR
 
 using BulletHell.ThirdParty.ECSJoints.Creators.Joints;
+using Unity.Mathematics;
+using Unity.Physics.Authoring;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
-using Unity.Mathematics;
-using Unity.Physics.Authoring;
 
-namespace Unity.Physics.Editor
+namespace BulletHell.ThirdParty.ECSJoints.Editors
 {
     [CustomEditor(typeof(RagdollJoint))]
     public class RagdollJointEditor : UnityEditor.Editor

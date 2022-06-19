@@ -3,13 +3,11 @@
 namespace BulletHell.ECS.Components.Singletons
 {
     [GenerateAuthoringComponent]
-    public struct GameDataSingletonComponent : IComponentData
+    public struct EntityPrefabsSingletonComponent : IComponentData
     {
-        public byte ppu;
-        
-        // PREFABS
         public Entity playerPrefab;
         public Entity enemyPrefab;
         public Entity testPrefab;
+        public Entity testPrefab2;
     }
 }

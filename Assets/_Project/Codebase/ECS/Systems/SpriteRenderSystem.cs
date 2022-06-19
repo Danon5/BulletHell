@@ -1,4 +1,6 @@
-﻿using BulletHell.ECS.Components;
+﻿using System.Collections.Generic;
+using BulletHell.ECS.Components;
+using BulletHell.ECS.SharedData;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -7,58 +9,99 @@ using UnityEngine;
 
 namespace BulletHell.ECS.Systems
 {
-    public partial class SpriteRenderSystem : SystemBase
+    [AlwaysUpdateSystem]
+    public partial class SpriteRenderSystem : SystemBase 
     {
         private const int BATCH_SIZE = 1023;
+
+        private static readonly int _HashBaseMap = Shader.PropertyToID("_BaseMap");
         
-        private Mesh _quad;
+        private readonly Matrix4x4[] _batchMatrixCache = new Matrix4x4[BATCH_SIZE];
+        private readonly Dictionary<SpriteSharedData, Mesh> _batchMeshCache = new Dictionary<SpriteSharedData, Mesh>();
+        private readonly Dictionary<SpriteSharedData, Material> _batchMaterialCache = new Dictionary<SpriteSharedData, Material>();
+        private readonly List<SpriteSharedData> _uniqueSpriteData = new List<SpriteSharedData>();
+
+        private EntityQuery _uniqueSpriteQuery;
 
         protected override void OnCreate()
         {
-            _quad = CreateQuad(1f, 1f);
+            _uniqueSpriteQuery = GetEntityQuery(
+                typeof(SpriteSharedData),
+                typeof(SpriteComponent),
+                typeof(LocalToWorld));
         }
 
         protected override void OnUpdate()
         {
-            int spriteCount = EntityManager.CreateEntityQuery(
-                typeof(SpriteComponent),
-                typeof(LocalToWorld)).CalculateEntityCount();
-            
-            NativeArray<Matrix4x4> matrices = new NativeArray<Matrix4x4>(spriteCount, Allocator.Temp);
+            EntityManager.GetAllUniqueSharedComponentData(_uniqueSpriteData);
 
-            float time = (float) Time.ElapsedTime;
-            
-            Entities.ForEach((
-                ref Translation translation,
-                in SpriteComponent sprite) =>
+            foreach (SpriteSharedData uniqueSpriteData in _uniqueSpriteData)
             {
-                translation.Value += new float3(
-                    math.sin(time) * GameConstants.TARGET_TIMESTEP,
-                    math.sin(time) * GameConstants.TARGET_TIMESTEP,
-                    0f);
-            }).Run();
-            
-            Entities.ForEach((
-                int entityInQueryIndex,
-                in SpriteComponent sprite,
-                in LocalToWorld localToWorld) =>
-            {
-                matrices[entityInQueryIndex] = localToWorld.Value;
-            }).Run();
+                _uniqueSpriteQuery.SetSharedComponentFilter(uniqueSpriteData);
 
-            Matrix4x4[] drawMatrices = new Matrix4x4[BATCH_SIZE];
+                int entitiesWithUniqueSpriteCount = _uniqueSpriteQuery.CalculateEntityCount();
 
-            for (int i = 0; i < spriteCount; i += BATCH_SIZE)
-            {
-                int count = math.min(spriteCount - i, BATCH_SIZE);
-                
-                NativeArray<Matrix4x4>.Copy(matrices, i, drawMatrices, 0, count);
-                
-                Graphics.DrawMeshInstanced(_quad, 0, GameAssets.TestMaterial, 
-                    drawMatrices, count);
+                Texture2D texture = GameAssets.GetTexture(uniqueSpriteData.textureId);
+
+                Mesh mesh = !_batchMeshCache.ContainsKey(uniqueSpriteData)
+                    ? CreateAndAddMeshToCache(uniqueSpriteData, texture)
+                    : _batchMeshCache[uniqueSpriteData];
+
+                Material material = !_batchMaterialCache.ContainsKey(uniqueSpriteData)
+                    ? CreateAndAddMaterialToCache(uniqueSpriteData, texture)
+                    : _batchMaterialCache[uniqueSpriteData];
+
+                NativeArray<Matrix4x4> matrices = new NativeArray<Matrix4x4>(entitiesWithUniqueSpriteCount, Allocator.Temp);
+
+                Entities.WithSharedComponentFilter(uniqueSpriteData).ForEach((
+                    int entityInQueryIndex,
+                    in SpriteComponent sprite,
+                    in LocalToWorld localToWorld) =>
+                {
+                    matrices[entityInQueryIndex] = localToWorld.Value;
+                }).Run();
+
+                for (int j = 0; j < entitiesWithUniqueSpriteCount; j += BATCH_SIZE)
+                {
+                    int count = math.min(entitiesWithUniqueSpriteCount - j, BATCH_SIZE);
+
+                    NativeArray<Matrix4x4>.Copy(matrices, j, _batchMatrixCache, 0, count);
+
+                    Graphics.DrawMeshInstanced(mesh, 0, material, _batchMatrixCache, count);
+                }
+
+                matrices.Dispose();
             }
 
-            matrices.Dispose();
+            _uniqueSpriteData.Clear();
+        }
+
+        private Mesh CreateAndAddMeshToCache(in SpriteSharedData uniqueSpriteData, in Texture2D texture)
+        {
+            Mesh mesh = CreateQuadFromTexture(texture);
+            _batchMeshCache.Add(uniqueSpriteData, mesh);
+            return mesh;
+        }
+        
+        private Material CreateAndAddMaterialToCache(in SpriteSharedData uniqueSpriteData, in Texture2D texture)
+        {
+            Material material = CreateMaterialFromTexture(texture);
+            _batchMaterialCache.Add(uniqueSpriteData, material);
+            return material;
+        }
+
+        private static Material CreateMaterialFromTexture(in Texture2D texture)
+        {
+            Material material = new Material(GameAssets.TestMaterial);
+            material.SetTexture(_HashBaseMap, texture);
+            return material;
+        }
+
+        private static Mesh CreateQuadFromTexture(in Texture2D texture)
+        {
+            return CreateQuad(
+                (float) texture.width / GameConstants.PPU, 
+                (float) texture.height / GameConstants.PPU);
         }
 
         private static Mesh CreateQuad(float width, float height)

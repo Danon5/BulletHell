@@ -22,15 +22,15 @@ namespace BulletHell
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
 
             Entity gameDataEntity = _entityManager.CreateEntityQuery(
-                typeof(GameDataSingletonComponent)).GetSingletonEntity();
+                typeof(EntityPrefabsSingletonComponent)).GetSingletonEntity();
 
-            GameDataSingletonComponent gameData = _entityManager.GetComponentData<GameDataSingletonComponent>(gameDataEntity);  
+            EntityPrefabsSingletonComponent entityPrefabs = _entityManager.GetComponentData<EntityPrefabsSingletonComponent>(gameDataEntity);  
 
-            _entityManager.Instantiate(gameData.playerPrefab);
+            _entityManager.Instantiate(entityPrefabs.playerPrefab);
 
             for (int i = 0; i < 400; i++)
             {
-                Entity enemy = _entityManager.Instantiate(gameData.enemyPrefab);
+                Entity enemy = _entityManager.Instantiate(entityPrefabs.enemyPrefab);
                 _entityManager.SetComponentData(enemy, new Translation
                 {
                     Value = new float3

@@ -1,12 +1,11 @@
 #if UNITY_EDITOR
 
 using BulletHell.ThirdParty.ECSJoints.Creators.Joints;
-using Unity.Physics.Authoring;
 using UnityEditor;
 using UnityEditor.IMGUI.Controls;
 using UnityEngine;
 
-namespace Unity.Physics.Editor
+namespace BulletHell.ThirdParty.ECSJoints.Editors
 {
     [CustomEditor(typeof(LimitedHingeJoint))]
     public class LimitedHingeEditor : UnityEditor.Editor

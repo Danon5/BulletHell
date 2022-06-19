@@ -13,6 +13,17 @@
         {
             "$type": "Unity.Build.Common.OutputBuildDirectory, Unity.Build",
             "OutputDirectory": "E:\\UnityBuilds\\BulletHell\\Windows\\Release"
+        },
+        {
+            "$type": "Unity.Build.Common.SceneList, Unity.Build",
+            "$version": 1,
+            "BuildCurrentScene": false,
+            "SceneInfos": [
+                {
+                    "Scene": "GlobalObjectId_V1-1-505fc4afdb03c734baf5d69495370760-102900000-0",
+                    "AutoLoad": true
+                }
+            ]
         }
     ]
 }

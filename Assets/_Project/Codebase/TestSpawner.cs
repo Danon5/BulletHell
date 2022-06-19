@@ -1,4 +1,6 @@
-﻿using BulletHell.ECS.Components.Singletons;
+﻿using BulletHell.ECS.Components;
+using BulletHell.ECS.SharedData;
+using JetBrains.Annotations;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -9,23 +11,32 @@ namespace BulletHell
 {
     public sealed class TestSpawner : MonoBehaviour
     {
+        
+        [UsedImplicitly]
         private void Start()
         {
             EntityManager entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
-            
-            Entity gameDataEntity = entityManager.CreateEntityQuery(
-                typeof(GameDataSingletonComponent)).GetSingletonEntity();
 
-            GameDataSingletonComponent gameData = entityManager.GetComponentData<GameDataSingletonComponent>(gameDataEntity);
-            
-            for (int i = 0; i < 20000; i++)
+            for (int i = 0; i < 100; i++)
             {
-                Entity entity = entityManager.Instantiate(gameData.testPrefab);
+                Entity entity = entityManager.CreateEntity();
+
+                entityManager.AddComponent<Translation>(entity);
+                entityManager.AddComponent<Rotation>(entity);
+                entityManager.AddComponent<LocalToWorld>(entity);
+                entityManager.AddComponent<SpriteComponent>(entity);
+                entityManager.AddComponent<SpriteSharedData>(entity);
+                
+                entityManager.SetSharedComponentData(entity, new SpriteSharedData
+                {
+                    textureId = (TextureId) Random.Range(0, 5)
+                });
+                
                 entityManager.SetComponentData(entity, new Translation
                 {
                     Value = new float3
                     {
-                        x = Random.Range(-20f, 20f),
+                        x = Random.Range(-40f, 40f),
                         y = Random.Range(-20f, 20f)
                     }
                 });

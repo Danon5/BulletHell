@@ -1,11 +1,9 @@
 #if UNITY_EDITOR
 
 using BulletHell.ThirdParty.ECSJoints.Creators.Joints;
-using Unity.Physics.Authoring;
 using UnityEditor;
-using UnityEngine;
 
-namespace Unity.Physics.Editor
+namespace BulletHell.ThirdParty.ECSJoints.Editors
 {
     [CustomEditor(typeof(BallAndSocketJoint))]
     public class BallAndSocketEditor : UnityEditor.Editor

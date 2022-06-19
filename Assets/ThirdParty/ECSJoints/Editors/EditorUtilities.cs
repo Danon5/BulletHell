@@ -1,12 +1,12 @@
-using UnityEngine;
 using Unity.Mathematics;
+using UnityEditor;
+using UnityEditor.IMGUI.Controls;
+using UnityEngine;
 using static Unity.Physics.Math;
 
 #if UNITY_EDITOR
-using UnityEditor;
-using UnityEditor.IMGUI.Controls;
 
-namespace Unity.Physics.Editor
+namespace BulletHell.ThirdParty.ECSJoints.Editors
 {
     /// <summary>
     /// Provides utilities that use Handles to set positions and axes,

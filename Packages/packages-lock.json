@@ -265,11 +265,11 @@
       }
     },
     "com.unity.rendering.hybrid": {
-      "version": "0.50.0-preview.44",
+      "version": "0.51.0-preview.32",
       "depth": 0,
       "source": "registry",
       "dependencies": {
-        "com.unity.entities": "0.50.1-preview.2"
+        "com.unity.entities": "0.51.0-preview.32"
       },
       "url": "https://packages.unity.com"
     },
