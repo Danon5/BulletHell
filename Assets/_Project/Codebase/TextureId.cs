@@ -2,11 +2,13 @@
 {
     public enum TextureId : ushort
     {
-        Character_Template_Default = 0,
-        Character_Template_Idle = 1,
-        Character_Template_Run = 2,
+        None = 0,
         
-        Cheeseburger = 3,
-        Dentures = 4,
+        Character_Template_Default = 1,
+        Character_Template_Idle = 2,
+        Character_Template_Run = 3,
+
+        Cheeseburger = 4,
+        Dentures = 5
     }
 }

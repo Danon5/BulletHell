@@ -46,13 +46,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _testMaterial: {fileID: 2100000, guid: e4d10f93bd142d24bb0197f3747afd83, type: 2}
   _textureLookups:
-  - <TextureId>k__BackingField: 0
-    <Texture>k__BackingField: {fileID: 2800000, guid: d4de1a03aafafa64f9c8d928379448ad, type: 3}
   - <TextureId>k__BackingField: 1
-    <Texture>k__BackingField: {fileID: 2800000, guid: 825e4b1776697e84ebda62c0ba423fab, type: 3}
+    <Texture>k__BackingField: {fileID: 2800000, guid: d4de1a03aafafa64f9c8d928379448ad, type: 3}
   - <TextureId>k__BackingField: 2
-    <Texture>k__BackingField: {fileID: 2800000, guid: 80b8b1969b5a2524bada8c1dc584347b, type: 3}
+    <Texture>k__BackingField: {fileID: 2800000, guid: 825e4b1776697e84ebda62c0ba423fab, type: 3}
   - <TextureId>k__BackingField: 3
-    <Texture>k__BackingField: {fileID: 2800000, guid: d4b5e2c891270e247bea33b40d9929e9, type: 3}
+    <Texture>k__BackingField: {fileID: 2800000, guid: 80b8b1969b5a2524bada8c1dc584347b, type: 3}
   - <TextureId>k__BackingField: 4
+    <Texture>k__BackingField: {fileID: 2800000, guid: d4b5e2c891270e247bea33b40d9929e9, type: 3}
+  - <TextureId>k__BackingField: 5
     <Texture>k__BackingField: {fileID: 2800000, guid: d19669f9febd17d4fad604374e750c23, type: 3}
+  _animationData:
+  - {fileID: 11400000, guid: 32dd69396fd29ac4cb7f1a23e028e1bc, type: 2}
+  - {fileID: 11400000, guid: f9f50132d827cb94d890a72acdf9a523, type: 2}

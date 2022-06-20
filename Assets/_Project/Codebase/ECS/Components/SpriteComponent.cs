@@ -5,6 +5,6 @@ namespace BulletHell.ECS.Components
 {
     public struct SpriteComponent : IComponentData
     {
-        public float4 uvScaleAndOffset;
+        public int2 spriteSheetIndex;
     }
 }

@@ -8,14 +8,14 @@ namespace BulletHell.ECS.Systems
     public partial class CameraFollowSystem : SystemBase
     {
         private Transform _cameraTransform;
-        
+
         protected override void OnUpdate()
         {
             if (_cameraTransform == null)
                 _cameraTransform = Camera.main?.transform;
 
             if (_cameraTransform == null) return;
-            
+
             Entities.ForEach((
                 in CameraFollowTargetComponent cameraFollowTarget,
                 in Translation translation) =>

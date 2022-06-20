@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using BulletHell.ECS.Components;
 using BulletHell.ECS.SharedData;
 using Unity.Collections;
@@ -11,17 +10,17 @@ using UnityEngine;
 namespace BulletHell.ECS.Systems
 {
     [AlwaysUpdateSystem]
-    public partial class SpriteRenderSystem : SystemBase 
+    public partial class SpriteRenderSystem : SystemBase
     {
         private const int BATCH_SIZE = 1023;
 
         private static readonly int _HashMainTex = Shader.PropertyToID("_MainTex");
         private static readonly int _HashUvScaleAndOffset = Shader.PropertyToID("_UvScaleAndOffset");
-        
-        private readonly Matrix4x4[] _batchMatrixCache = new Matrix4x4[BATCH_SIZE];
-        private readonly Vector4[] _batchUvScaleAndOffsetCache = new Vector4[BATCH_SIZE]; 
-        private readonly Dictionary<SpriteSharedData, Mesh> _batchMeshCache = new Dictionary<SpriteSharedData, Mesh>();
         private readonly Dictionary<SpriteSharedData, Material> _batchMaterialCache = new Dictionary<SpriteSharedData, Material>();
+
+        private readonly Matrix4x4[] _batchMatrixCache = new Matrix4x4[BATCH_SIZE];
+        private readonly Dictionary<SpriteSharedData, Mesh> _batchMeshCache = new Dictionary<SpriteSharedData, Mesh>();
+        private readonly Vector4[] _batchUvScaleAndOffsetCache = new Vector4[BATCH_SIZE];
         private readonly List<SpriteSharedData> _uniqueSpriteData = new List<SpriteSharedData>();
 
         private EntityQuery _uniqueSpriteQuery;
@@ -40,22 +39,27 @@ namespace BulletHell.ECS.Systems
 
             foreach (SpriteSharedData uniqueSpriteData in _uniqueSpriteData)
             {
+                if (uniqueSpriteData.textureId == TextureId.None) continue;
+                
                 _uniqueSpriteQuery.SetSharedComponentFilter(uniqueSpriteData);
 
                 int entitiesWithUniqueSpriteCount = _uniqueSpriteQuery.CalculateEntityCount();
 
                 Texture2D texture = GameAssets.GetTexture(uniqueSpriteData.textureId);
 
-                Mesh mesh = !_batchMeshCache.ContainsKey(uniqueSpriteData)
-                    ? CreateAndAddMeshToCache(uniqueSpriteData, texture)
-                    : _batchMeshCache[uniqueSpriteData];
+                Mesh mesh = _batchMeshCache.ContainsKey(uniqueSpriteData)
+                    ? _batchMeshCache[uniqueSpriteData]
+                    : CreateAndAddMeshToCache(uniqueSpriteData, texture);
 
-                Material material = !_batchMaterialCache.ContainsKey(uniqueSpriteData)
-                    ? CreateAndAddMaterialToCache(uniqueSpriteData, texture)
-                    : _batchMaterialCache[uniqueSpriteData];
+                Material material = _batchMaterialCache.ContainsKey(uniqueSpriteData)
+                    ? _batchMaterialCache[uniqueSpriteData]
+                    : CreateAndAddMaterialToCache(uniqueSpriteData, texture);
 
                 NativeArray<Matrix4x4> matrices = new NativeArray<Matrix4x4>(entitiesWithUniqueSpriteCount, Allocator.Temp);
                 NativeArray<Vector4> uvScaleAndOffsets = new NativeArray<Vector4>(entitiesWithUniqueSpriteCount, Allocator.Temp);
+
+                // needed to avoid burst compilation error involving duplicate variable names
+                SpriteSharedData sharedDataCopy = uniqueSpriteData;
 
                 Entities.WithSharedComponentFilter(uniqueSpriteData).ForEach((
                     int entityInQueryIndex,
@@ -63,13 +67,24 @@ namespace BulletHell.ECS.Systems
                     in LocalToWorld localToWorld) =>
                 {
                     matrices[entityInQueryIndex] = localToWorld.Value;
-                    uvScaleAndOffsets[entityInQueryIndex] = sprite.uvScaleAndOffset;
+
+                    float2 uvScalePerColumnRow = new float2(
+                        1f / sharedDataCopy.spriteSheetColumnsRows.x,
+                        1f / sharedDataCopy.spriteSheetColumnsRows.y);
+
+                    uvScaleAndOffsets[entityInQueryIndex] = new Vector4
+                    {
+                        x = uvScalePerColumnRow.x,
+                        y = uvScalePerColumnRow.y,
+                        z = uvScalePerColumnRow.x * sprite.spriteSheetIndex.x,
+                        w = uvScalePerColumnRow.y * sprite.spriteSheetIndex.y
+                    };
                 }).Run();
-                
+
                 for (int j = 0; j < entitiesWithUniqueSpriteCount; j += BATCH_SIZE)
                 {
                     int count = math.min(entitiesWithUniqueSpriteCount - j, BATCH_SIZE);
-                    
+
                     NativeArray<Matrix4x4>.Copy(matrices, j, _batchMatrixCache, 0, count);
                     NativeArray<Vector4>.Copy(uvScaleAndOffsets, j, _batchUvScaleAndOffsetCache, 0, count);
 
@@ -78,25 +93,25 @@ namespace BulletHell.ECS.Systems
 
                     Graphics.DrawMeshInstanced(mesh, 0, material, _batchMatrixCache, count, materialPropertyBlock);
                 }
-                
+
                 matrices.Dispose();
                 uvScaleAndOffsets.Dispose();
             }
-            
+
             _uniqueSpriteData.Clear();
         }
 
-        private Mesh CreateAndAddMeshToCache(in SpriteSharedData uniqueSpriteData, in Texture2D texture)
+        private Mesh CreateAndAddMeshToCache(in SpriteSharedData spriteData, in Texture2D texture)
         {
-            Mesh mesh = CreateQuadFromTexture(texture);
-            _batchMeshCache.Add(uniqueSpriteData, mesh);
+            Mesh mesh = CreateQuadFromTexture(texture, spriteData.spriteSheetColumnsRows);
+            _batchMeshCache.Add(spriteData, mesh);
             return mesh;
         }
-        
-        private Material CreateAndAddMaterialToCache(in SpriteSharedData uniqueSpriteData, in Texture2D texture)
+
+        private Material CreateAndAddMaterialToCache(in SpriteSharedData spriteData, in Texture2D texture)
         {
             Material material = CreateMaterialFromTexture(texture);
-            _batchMaterialCache.Add(uniqueSpriteData, material);
+            _batchMaterialCache.Add(spriteData, material);
             return material;
         }
 
@@ -107,11 +122,11 @@ namespace BulletHell.ECS.Systems
             return material;
         }
 
-        private static Mesh CreateQuadFromTexture(in Texture2D texture)
+        private static Mesh CreateQuadFromTexture(in Texture2D texture, in int2 columnsRows)
         {
             return CreateQuad(
-                (float) texture.width / GameConstants.PPU, 
-                (float) texture.height / GameConstants.PPU);
+                texture.width / (float)columnsRows.x / GameConstants.PPU,
+                texture.height / (float)columnsRows.y / GameConstants.PPU);
         }
 
         private static Mesh CreateQuad(float width, float height)
@@ -120,8 +135,8 @@ namespace BulletHell.ECS.Systems
 
             float w = width * .5f;
             float h = height * .5f;
-            
-            Vector3[] vertices = 
+
+            Vector3[] vertices =
             {
                 new Vector3(-w, -h, 0),
                 new Vector3(w, -h, 0),
@@ -129,7 +144,7 @@ namespace BulletHell.ECS.Systems
                 new Vector3(w, h, 0)
             };
 
-            int[] tris = 
+            int[] tris =
             {
                 0, 2, 1,
                 2, 3, 1

@@ -17,7 +17,7 @@ namespace BulletHell.ECS.Systems
 
         protected override void OnUpdate()
         {
-            EntityCommandBuffer.ParallelWriter parallelWriter = 
+            EntityCommandBuffer.ParallelWriter parallelWriter =
                 _endSimulationEntityCommandBufferSystem.CreateCommandBuffer().AsParallelWriter();
 
             Entities.ForEach((
@@ -41,7 +41,7 @@ namespace BulletHell.ECS.Systems
                 flipX.flipped = shouldBeFlipped;
                 parallelWriter.SetComponent(entityInQueryIndex, flipX.spriteEntity, newRotation);
             }).ScheduleParallel();
-            
+
             _endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(Dependency);
         }
     }

@@ -19,7 +19,7 @@ namespace BulletHell.ECS.Systems.EnemySystems
 
             if (aggroTargets.Length == 0)
                 return;
-            
+
             Entity aggroTarget = aggroTargets[0];
             Translation aggroTargetTranslation = EntityManager.GetComponentData<Translation>(aggroTarget);
 

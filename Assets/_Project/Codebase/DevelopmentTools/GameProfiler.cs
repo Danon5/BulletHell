@@ -8,15 +8,15 @@ namespace BulletHell.DevelopmentTools
     {
         [SerializeField] private Vector2 _boxSize;
         [SerializeField] private GUIStyle _boxStyle;
-        private string _statsText;
-        private ProfilerRecorder _systemMemoryRecorder;
         private ProfilerRecorder _gcMemoryRecorder;
         private ProfilerRecorder _mainThreadTimeRecorder;
+        private string _statsText;
+        private ProfilerRecorder _systemMemoryRecorder;
 
         private void Update()
         {
             double frameTime = GetRecorderFrameAverage(_mainThreadTimeRecorder) * 1e-6f;
-            
+
             StringBuilder sb = new StringBuilder(500);
             sb.AppendLine($"Frame Rate: {1000f / frameTime:F1} FPS");
             //sb.AppendLine($"Frame Time: {frameTime:F1} ms");
@@ -43,7 +43,7 @@ namespace BulletHell.DevelopmentTools
         {
             GUI.Box(new Rect(25, 25, _boxSize.x, _boxSize.y), _statsText, _boxStyle);
         }
-        
+
         private static double GetRecorderFrameAverage(ProfilerRecorder recorder)
         {
             int samplesCount = recorder.Capacity;

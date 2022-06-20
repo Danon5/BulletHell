@@ -1,4 +1,5 @@
 ﻿using BulletHell.ECS.Components.Singletons;
+using JetBrains.Annotations;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -11,7 +12,8 @@ namespace BulletHell
     public sealed class GameSimulation : MonoBehaviour
     {
         private EntityManager _entityManager;
-        
+
+        [UsedImplicitly]
         private void Start()
         {
             Application.targetFrameRate = GameConstants.TARGET_FRAMERATE;
@@ -24,7 +26,8 @@ namespace BulletHell
             Entity gameDataEntity = _entityManager.CreateEntityQuery(
                 typeof(EntityPrefabsSingletonComponent)).GetSingletonEntity();
 
-            EntityPrefabsSingletonComponent entityPrefabs = _entityManager.GetComponentData<EntityPrefabsSingletonComponent>(gameDataEntity);  
+            EntityPrefabsSingletonComponent entityPrefabs =
+                _entityManager.GetComponentData<EntityPrefabsSingletonComponent>(gameDataEntity);
 
             _entityManager.Instantiate(entityPrefabs.playerPrefab);
 
