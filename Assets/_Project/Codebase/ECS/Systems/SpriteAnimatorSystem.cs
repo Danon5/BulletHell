@@ -5,10 +5,10 @@ using BulletHell.ECS.SharedData;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using UnityEngine;
 
 namespace BulletHell.ECS.Systems
 {
+    [UpdateBefore(typeof(SpriteRenderSystem))]
     public partial class SpriteAnimatorSystem : SystemBase
     {
         private readonly Dictionary<SpriteAnimationSharedData, AnimationData> _batchAnimationDataCache =

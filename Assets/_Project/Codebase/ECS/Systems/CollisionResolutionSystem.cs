@@ -8,7 +8,8 @@ using UnityEngine;
 
 namespace BulletHell.ECS.Systems
 {
-    public partial class PhysicsSystem : SystemBase
+    [UpdateAfter(typeof(RigidbodyMovementSystem))]
+    public partial class CollisionResolutionSystem : SystemBase
     {
         private EntityQuery _circleColliderQuery;
 
@@ -26,20 +27,12 @@ namespace BulletHell.ECS.Systems
 
             NativeArray<CircleCollider> circleColliders = new NativeArray<CircleCollider>(circleColliderCount, Allocator.TempJob);
 
-            //Vector3 viewportMousePos = new Vector3(Input.mousePosition.x / Screen.width, Input.mousePosition.y / Screen.height);
-            //Vector3 worldMousePos = Camera.main.ViewportToWorldPoint(viewportMousePos);
-
             Entities.ForEach((
                 int entityInQueryIndex,
-                ref Translation translation,
+                in Translation translation,
                 in RigidbodyComponent rigidbody,
                 in CircleColliderComponent circleCollider) =>
             {
-                //if (entityInQueryIndex == 0)
-                //translation.Value = new float3(worldMousePos.x, worldMousePos.y, 0f);
-
-                translation.Value += new float3(rigidbody.velocity.x, rigidbody.velocity.y, 0f) * GameConstants.TARGET_TIMESTEP;
-
                 circleColliders[entityInQueryIndex] = new CircleCollider
                 {
                     position = new float2(translation.Value.x, translation.Value.y),
@@ -51,7 +44,7 @@ namespace BulletHell.ECS.Systems
             
             Entities.ForEach((
                 int entityInQueryIndex,
-                ref Translation translation,
+                in Translation translation,
                 in RigidbodyComponent rigidbody,
                 in CircleColliderComponent circleCollider) =>
             {

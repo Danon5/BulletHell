@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BulletHell.ECS.Systems.PlayerSystems
 {
-    [UpdateBefore(typeof(PhysicsSystem))]
+    [UpdateBefore(typeof(RigidbodyMovementSystem))]
     public partial class PlayerMovementSystem : SystemBase
     {
         protected override void OnUpdate()

@@ -6,7 +6,7 @@ using Unity.Transforms;
 
 namespace BulletHell.ECS.Systems.EnemySystems
 {
-    [UpdateBefore(typeof(PhysicsSystem))]
+    [UpdateBefore(typeof(RigidbodyMovementSystem))]
     public partial class EnemyMovementSystem : SystemBase
     {
         protected override void OnUpdate()
