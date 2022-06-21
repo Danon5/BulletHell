@@ -40,7 +40,8 @@ namespace BulletHell
             _entityManager.AddSharedComponentData(playerEntity, new SpriteSharedData
             {
                 textureId = TextureId.Character_Havoc_Default,
-                spriteSheetColumnsRows = new int2(1, 1)
+                spriteSheetColumnsRows = new int2(1, 1),
+                spriteOriginOffset = new int2(0, 12)
             });
 
             return playerEntity;

@@ -66,8 +66,18 @@ namespace BulletHell.ECS.Systems
                     in SpriteComponent sprite,
                     in LocalToWorld localToWorld) =>
                 {
-                    matrices[entityInQueryIndex] = localToWorld.Value;
+                    if (sharedDataCopy.spriteOriginOffset.x != 0 && sharedDataCopy.spriteOriginOffset.y != 0)
+                    {
+                        float3 originOffset = new float3(sharedDataCopy.spriteOriginOffset.x, sharedDataCopy.spriteOriginOffset.y, 0f);
+                        float3 position = localToWorld.Position + originOffset / GameConstants.PPU;
+                        quaternion rotation = localToWorld.Rotation;
+                        float3 scale = localToWorld.Value.GetScale();
 
+                        matrices[entityInQueryIndex] = float4x4.TRS(position, rotation, scale);
+                    }
+                    else
+                        matrices[entityInQueryIndex] = localToWorld.Value;
+                    
                     float2 uvScalePerColumnRow = new float2(
                         1f / sharedDataCopy.spriteSheetColumnsRows.x,
                         1f / sharedDataCopy.spriteSheetColumnsRows.y);
