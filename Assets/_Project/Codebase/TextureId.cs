@@ -9,6 +9,11 @@
         Character_Template_Run = 3,
 
         Cheeseburger = 4,
-        Dentures = 5
+        Dentures = 5,
+        
+        Character_Havoc_Default = 6,
+        Box16 = 7,
+        Circle16 = 8,
+        Circle32 = 9,
     }
 }

@@ -6,7 +6,7 @@ using Unity.Transforms;
 
 namespace BulletHell.ECS.Systems.EnemySystems
 {
-    [UpdateBefore(typeof(PhysicsMovementSystem))]
+    [UpdateBefore(typeof(PhysicsSystem))]
     public partial class EnemyMovementSystem : SystemBase
     {
         protected override void OnUpdate()
@@ -25,11 +25,11 @@ namespace BulletHell.ECS.Systems.EnemySystems
 
             Entities.ForEach((
                 ref Translation translation,
-                ref MovementComponent movement,
+                ref RigidbodyComponent rigidbody,
                 in EnemyComponent enemy) =>
             {
                 float2 dirToTarget = math.normalizesafe(aggroTargetTranslation.Value.xy - translation.Value.xy);
-                movement.velocity = dirToTarget * movement.speed;
+                rigidbody.velocity = dirToTarget * 3f;
             }).ScheduleParallel();
 
             aggroTargets.Dispose();

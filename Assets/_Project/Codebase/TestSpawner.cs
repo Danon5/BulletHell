@@ -24,12 +24,14 @@ namespace BulletHell
             _entityManager = World.DefaultGameObjectInjectionWorld.EntityManager;
         }
 
+        [UsedImplicitly]
         private void Update()
         {
             if (Input.GetKeyDown(KeyCode.G))
                 AddEntities();
         }
 
+        [UsedImplicitly]
         private void OnGUI()
         {
             GUIStyle style = GUI.skin.label;

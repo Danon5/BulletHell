@@ -56,6 +56,14 @@ MonoBehaviour:
     <Texture>k__BackingField: {fileID: 2800000, guid: d4b5e2c891270e247bea33b40d9929e9, type: 3}
   - <TextureId>k__BackingField: 5
     <Texture>k__BackingField: {fileID: 2800000, guid: d19669f9febd17d4fad604374e750c23, type: 3}
+  - <TextureId>k__BackingField: 6
+    <Texture>k__BackingField: {fileID: 2800000, guid: ff724adbe7ff8e148938ebfd8c06aad6, type: 3}
+  - <TextureId>k__BackingField: 7
+    <Texture>k__BackingField: {fileID: 2800000, guid: 7d0c05e0c6efa284eab51179e0197ab9, type: 3}
+  - <TextureId>k__BackingField: 8
+    <Texture>k__BackingField: {fileID: 2800000, guid: a8d7a20d46f8b07488086cdc45419be8, type: 3}
+  - <TextureId>k__BackingField: 9
+    <Texture>k__BackingField: {fileID: 2800000, guid: 818c62d003942094ea84f969ab7837fc, type: 3}
   _animationData:
   - {fileID: 11400000, guid: 32dd69396fd29ac4cb7f1a23e028e1bc, type: 2}
   - {fileID: 11400000, guid: f9f50132d827cb94d890a72acdf9a523, type: 2}

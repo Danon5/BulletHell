@@ -2,9 +2,8 @@
 
 namespace BulletHell.ECS.Components
 {
-    public struct FlipXComponent : IComponentData
+    public struct SpriteFlipXComponent : IComponentData
     {
-        public Entity spriteEntity;
         public bool flipped;
     }
 }

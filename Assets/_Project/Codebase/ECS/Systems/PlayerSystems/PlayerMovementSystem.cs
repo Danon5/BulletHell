@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace BulletHell.ECS.Systems.PlayerSystems
 {
-    [UpdateBefore(typeof(PhysicsMovementSystem))]
+    [UpdateBefore(typeof(PhysicsSystem))]
     public partial class PlayerMovementSystem : SystemBase
     {
         protected override void OnUpdate()
@@ -14,10 +14,10 @@ namespace BulletHell.ECS.Systems.PlayerSystems
 
             Entities.ForEach((
                 ref Translation translation,
-                ref MovementComponent movement,
+                ref RigidbodyComponent rigidbody,
                 in PlayerComponent player) =>
             {
-                movement.velocity = moveAxis * movement.speed;
+                rigidbody.velocity = moveAxis * 5f;
             }).ScheduleParallel();
         }
     }

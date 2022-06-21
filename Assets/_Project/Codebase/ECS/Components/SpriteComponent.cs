@@ -6,5 +6,7 @@ namespace BulletHell.ECS.Components
     public struct SpriteComponent : IComponentData
     {
         public int2 spriteSheetIndex;
+        public bool flipX;
+        public bool flipY;
     }
 }

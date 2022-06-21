@@ -5,8 +5,8 @@ using Unity.Transforms;
 
 namespace BulletHell.ECS.Systems
 {
-    [UpdateAfter(typeof(PhysicsMovementSystem))]
-    public partial class FlipXSystem : SystemBase
+    [UpdateBefore(typeof(SpriteRenderSystem))]
+    public partial class SpriteFlipXSystem : SystemBase
     {
         private EndSimulationEntityCommandBufferSystem _endSimulationEntityCommandBufferSystem;
 
@@ -22,10 +22,12 @@ namespace BulletHell.ECS.Systems
 
             Entities.ForEach((
                 int entityInQueryIndex,
-                ref FlipXComponent flipX,
-                in MovementComponent playerMovement) =>
+                Entity entity,
+                ref SpriteFlipXComponent flipX,
+                ref SpriteComponent sprite,
+                in RigidbodyComponent rigidbody) =>
             {
-                float xVel = playerMovement.velocity.x;
+                float xVel = rigidbody.velocity.x;
 
                 if (math.abs(xVel) <= .01) return;
 
@@ -39,7 +41,7 @@ namespace BulletHell.ECS.Systems
                 };
 
                 flipX.flipped = shouldBeFlipped;
-                parallelWriter.SetComponent(entityInQueryIndex, flipX.spriteEntity, newRotation);
+                parallelWriter.SetComponent(entityInQueryIndex, entity, newRotation);
             }).ScheduleParallel();
 
             _endSimulationEntityCommandBufferSystem.AddJobHandleForProducer(Dependency);
