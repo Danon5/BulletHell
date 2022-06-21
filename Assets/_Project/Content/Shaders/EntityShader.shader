@@ -8,6 +8,7 @@ Shader "Custom/EntityShader"
     {
         Tags { "RenderType"="Transparent" "Queue"="Transparent" "IgnoreProjector"="true" }
         LOD 100
+        Cull Off
         Blend SrcAlpha OneMinusSrcAlpha
 
         Pass

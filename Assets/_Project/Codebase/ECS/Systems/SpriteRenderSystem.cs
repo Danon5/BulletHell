@@ -55,8 +55,8 @@ namespace BulletHell.ECS.Systems
                     ? _batchMaterialCache[uniqueSpriteData]
                     : CreateAndAddMaterialToCache(uniqueSpriteData, texture);
 
-                NativeArray<Matrix4x4> matrices = new NativeArray<Matrix4x4>(entitiesWithUniqueSpriteCount, Allocator.Temp);
-                NativeArray<Vector4> uvScaleAndOffsets = new NativeArray<Vector4>(entitiesWithUniqueSpriteCount, Allocator.Temp);
+                NativeArray<Matrix4x4> matrices = new NativeArray<Matrix4x4>(entitiesWithUniqueSpriteCount, Allocator.TempJob);
+                NativeArray<Vector4> uvScaleAndOffsets = new NativeArray<Vector4>(entitiesWithUniqueSpriteCount, Allocator.TempJob);
 
                 // needed to avoid burst compilation error involving duplicate variable names
                 SpriteSharedData sharedDataCopy = uniqueSpriteData;
@@ -74,12 +74,14 @@ namespace BulletHell.ECS.Systems
 
                     uvScaleAndOffsets[entityInQueryIndex] = new Vector4
                     {
-                        x = uvScalePerColumnRow.x,
+                        x = sprite.flipX ? -uvScalePerColumnRow.x : uvScalePerColumnRow.x,
                         y = uvScalePerColumnRow.y,
-                        z = uvScalePerColumnRow.x * sprite.spriteSheetIndex.x,
+                        z = uvScalePerColumnRow.x * sprite.spriteSheetIndex.x + (sprite.flipX ? 1f : 0f),
                         w = uvScalePerColumnRow.y * sprite.spriteSheetIndex.y
                     };
-                }).Run();
+                }).Schedule();
+                
+                Dependency.Complete();
 
                 for (int j = 0; j < entitiesWithUniqueSpriteCount; j += BATCH_SIZE)
                 {

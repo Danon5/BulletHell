@@ -1,6 +1,7 @@
 ﻿using System;
 using BulletHell.ECS.Components;
 using BulletHell.ECS.SharedData;
+using BulletHell.ECS.Tags;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -34,7 +35,7 @@ namespace BulletHell
             _entityManager.AddComponentData(playerEntity, new PlayerComponent());
             _entityManager.AddComponentData(playerEntity, new CameraFollowTargetComponent());
             _entityManager.AddComponentData(playerEntity, new RigidbodyComponent());
-            _entityManager.AddComponentData(playerEntity, new SpriteFlipXComponent());
+            _entityManager.AddComponentData(playerEntity, new SpriteAutoFlipXTag());
             _entityManager.AddComponentData(playerEntity, new SpriteComponent());
             _entityManager.AddSharedComponentData(playerEntity, new SpriteSharedData
             {
