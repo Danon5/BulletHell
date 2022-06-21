@@ -14,12 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   <AnimationId>k__BackingField: 1
   <SpriteSheet>k__BackingField: {fileID: 2800000, guid: 825e4b1776697e84ebda62c0ba423fab, type: 3}
-  <FramesPerSecond>k__BackingField: 1
+  <FramesPerSecond>k__BackingField: 12
   <SpriteSheetSize>k__BackingField:
     x: 2
     y: 1
   <StartIndex>k__BackingField: 0
-  <Length>k__BackingField: 2
   <FrameData>k__BackingField:
-  - frameDuration: 1
-  - frameDuration: 1
+  - frameDuration: 12
+  - frameDuration: 12

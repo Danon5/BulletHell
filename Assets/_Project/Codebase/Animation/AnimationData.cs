@@ -14,7 +14,17 @@ namespace BulletHell.Animation
         [field: SerializeField] public int FramesPerSecond { get; private set; }
         [field: SerializeField] public int2 SpriteSheetSize { get; private set; }
         [field: SerializeField] public int StartIndex { get; private set; }
-        [field: SerializeField] public int Length { get; private set; }
         [field: SerializeField] [field: NonReorderable] public AnimationFrameData[] FrameData { get; private set; }
+        public int Length => FrameData.Length;
+        public int LengthWithFrameDurationIncluded
+        {
+            get
+            {
+                int length = 0;
+                for (int i = 0; i < FrameData.Length; i++)
+                    length += FrameData[i].frameDuration;
+                return length;
+            }
+        }
     }
 }
