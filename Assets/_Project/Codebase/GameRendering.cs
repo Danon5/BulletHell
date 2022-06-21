@@ -6,13 +6,17 @@ namespace BulletHell
 {
     public sealed class GameRendering : MonoBehaviour
     {
+        [SerializeField] private Camera _gameRenderCamera;
+        [SerializeField] private Camera _pixelationCamera;
         [SerializeField] private RawImage _gameRenderImage;
-        
-        public RenderTexture GameRenderTexture { get; private set; }
+
+        public static Camera GameRenderCamera => _singleton._gameRenderCamera;
+        public static Camera PixelationCamera => _singleton._pixelationCamera;
+        public static RenderTexture PixelationRenderTexture => _singleton._pixelationRenderTexture;
 
         private static GameRendering _singleton;
         
-        private Camera _camera;
+        private RenderTexture _pixelationRenderTexture;
         private float _previousOrthographicSize;
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
@@ -25,23 +29,28 @@ namespace BulletHell
         private void Awake()
         {
             _singleton = this;
-            TryRecalculateRenderTexture();
+            
+            UpdatePixelationCamera();
         }
 
         [UsedImplicitly]
         private void LateUpdate()
         {
+            UpdatePixelationCamera();
+        }
+
+        private void UpdatePixelationCamera()
+        {
+            if (_gameRenderCamera == null || _pixelationCamera == null) return;
+
+            _pixelationCamera.orthographicSize = _gameRenderCamera.orthographicSize;
+            
             TryRecalculateRenderTexture();
         }
 
         private void TryRecalculateRenderTexture()
         {
-            if (_camera == null)
-                _camera = Camera.main;
-            
-            if (_camera == null) return;
-            
-            float orthographicSize = _camera.orthographicSize;
+            float orthographicSize = _pixelationCamera.orthographicSize;
 
             if (Mathf.Abs(orthographicSize - _previousOrthographicSize) > .01f)
                 AssignNewRenderTextureWithCorrectDimensions(orthographicSize);
@@ -56,17 +65,17 @@ namespace BulletHell
             int height = Mathf.RoundToInt(verticalSize);
             int width = Mathf.RoundToInt(verticalSize * aspect);
 
-            if (GameRenderTexture != null)
-                GameRenderTexture.Release();
+            if (_pixelationRenderTexture != null)
+                _pixelationRenderTexture.Release();
             
-            GameRenderTexture = new RenderTexture(width, height, 24)
+            _pixelationRenderTexture = new RenderTexture(width, height, 24)
             {
                 filterMode = FilterMode.Point
             };
-            GameRenderTexture.Create();
+            _pixelationRenderTexture.Create();
             
-            _camera.targetTexture = GameRenderTexture;
-            _gameRenderImage.texture = GameRenderTexture;
+            _pixelationCamera.targetTexture = _pixelationRenderTexture;
+            _gameRenderImage.texture = _pixelationRenderTexture;
         }
     }
 }
