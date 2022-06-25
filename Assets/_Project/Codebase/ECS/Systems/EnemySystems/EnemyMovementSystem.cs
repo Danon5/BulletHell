@@ -1,4 +1,5 @@
 ﻿using BulletHell.ECS.Components;
+using BulletHell.ECS.SystemGroups;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -6,7 +7,7 @@ using Unity.Transforms;
 
 namespace BulletHell.ECS.Systems.EnemySystems
 {
-    [UpdateBefore(typeof(RigidbodyMovementSystem))]
+    [UpdateInGroup(typeof(GameplaySystemGroup))]
     public partial class EnemyMovementSystem : SystemBase
     {
         protected override void OnUpdate()

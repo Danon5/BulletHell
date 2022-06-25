@@ -1,7 +1,7 @@
-﻿using System;
-using BulletHell.ECS.Components;
-using BulletHell.ECS.SharedData;
+﻿using BulletHell.ECS.Components;
+using BulletHell.ECS.SharedComponents;
 using BulletHell.ECS.Tags;
+using JetBrains.Annotations;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
@@ -14,12 +14,14 @@ namespace BulletHell
         private static EntitySpawner _singleton;
         private static EntityManager _entityManager;
         
+        [UsedImplicitly]
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void InitializeOnLoad()
         {
             _singleton = null;
         }
         
+        [UsedImplicitly]
         private void Awake()
         {
             _singleton = this;
@@ -37,14 +39,49 @@ namespace BulletHell
             _entityManager.AddComponentData(playerEntity, new RigidbodyComponent());
             _entityManager.AddComponentData(playerEntity, new SpriteAutoFlipXTag());
             _entityManager.AddComponentData(playerEntity, new SpriteComponent());
-            _entityManager.AddSharedComponentData(playerEntity, new SpriteSharedData
+            _entityManager.AddComponentData(playerEntity, new AggroAttractorComponent());
+            _entityManager.AddComponentData(playerEntity, new ColliderComponent
+            {
+                colliderType = ColliderType.Circle,
+                isTrigger = true,
+                tracksCollisions = true,
+                circleColliderRadius = .5f
+            });
+            _entityManager.AddSharedComponentData(playerEntity, new SpriteSharedComponent
             {
                 textureId = TextureId.Character_Havoc_Default,
                 spriteSheetColumnsRows = new int2(1, 1),
-                spriteOriginOffset = new int2(0, 12)
+                spriteOriginOffset = new int2(0, -12)
             });
 
             return playerEntity;
+        }
+        
+        public static Entity SpawnEnemyEntity()
+        {
+            Entity enemyEntity = _entityManager.CreateEntity();
+            
+            AddTransformComponentsToEntity(enemyEntity);
+
+            _entityManager.AddComponentData(enemyEntity, new EnemyComponent());
+            _entityManager.AddComponentData(enemyEntity, new RigidbodyComponent());
+            _entityManager.AddComponentData(enemyEntity, new SpriteAutoFlipXTag());
+            _entityManager.AddComponentData(enemyEntity, new SpriteComponent());
+            _entityManager.AddComponentData(enemyEntity, new ColliderComponent
+            {
+                colliderType = ColliderType.Circle,
+                isTrigger = false,
+                tracksCollisions = true,
+                circleColliderRadius = 1f
+            });
+            _entityManager.AddSharedComponentData(enemyEntity, new SpriteSharedComponent
+            {
+                textureId = TextureId.Cheeseburger,
+                spriteSheetColumnsRows = new int2(1, 1),
+                spriteOriginOffset = new int2(0, 0)
+            });
+
+            return enemyEntity;
         }
 
         public static void AddTransformComponentsToEntity(in Entity entity)

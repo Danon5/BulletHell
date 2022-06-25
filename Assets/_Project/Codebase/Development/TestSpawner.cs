@@ -1,6 +1,5 @@
-﻿using System;
-using BulletHell.ECS.Components;
-using BulletHell.ECS.SharedData;
+﻿using BulletHell.ECS.Components;
+using BulletHell.ECS.SharedComponents;
 using JetBrains.Annotations;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -8,7 +7,7 @@ using Unity.Transforms;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace BulletHell
+namespace BulletHell.Development
 {
     public sealed class TestSpawner : MonoBehaviour
     {
@@ -54,8 +53,8 @@ namespace BulletHell
                 _entityManager.AddComponent<LocalToWorld>(entity);
                 _entityManager.AddComponent<SpriteComponent>(entity);
                 _entityManager.AddComponent<SpriteAnimatorComponent>(entity);
-                _entityManager.AddComponent<SpriteSharedData>(entity);
-                _entityManager.AddComponent<SpriteAnimationSharedData>(entity);
+                _entityManager.AddComponent<SpriteSharedComponent>(entity);
+                _entityManager.AddComponent<SpriteAnimationSharedComponent>(entity);
 
                 _entityManager.SetComponentData(entity, new SpriteComponent
                 {
@@ -68,13 +67,13 @@ namespace BulletHell
                     animationTimeScale = 1f
                 });
 
-                _entityManager.SetSharedComponentData(entity, new SpriteSharedData
+                _entityManager.SetSharedComponentData(entity, new SpriteSharedComponent
                 {
                     textureId = TextureId.Character_Template_Run,
                     spriteSheetColumnsRows = new int2(8, 1) // remove this and get from scriptableobject in sprite render system
                 });
 
-                _entityManager.SetSharedComponentData(entity, new SpriteAnimationSharedData
+                _entityManager.SetSharedComponentData(entity, new SpriteAnimationSharedComponent
                 {
                     animationId = AnimationId.Character_Template_Run
                 });

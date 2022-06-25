@@ -1,6 +1,6 @@
 ﻿namespace BulletHell
 {
-    public enum AnimationId
+    public enum AnimationId : ushort
     {
         None = 0,
         

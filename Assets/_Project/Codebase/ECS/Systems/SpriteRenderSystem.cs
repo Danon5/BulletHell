@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using BulletHell.ECS.Components;
-using BulletHell.ECS.SharedData;
+using BulletHell.ECS.SharedComponents;
+using BulletHell.ECS.SystemGroups;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
@@ -10,25 +11,26 @@ using UnityEngine;
 namespace BulletHell.ECS.Systems
 {
     [AlwaysUpdateSystem]
+    [UpdateInGroup(typeof(RenderingSystemGroup))]
     public partial class SpriteRenderSystem : SystemBase
     {
         private const int BATCH_SIZE = 1023;
 
         private static readonly int _HashMainTex = Shader.PropertyToID("_MainTex");
         private static readonly int _HashUvScaleAndOffset = Shader.PropertyToID("_UvScaleAndOffset");
-        private readonly Dictionary<SpriteSharedData, Material> _batchMaterialCache = new Dictionary<SpriteSharedData, Material>();
+        private readonly Dictionary<SpriteSharedComponent, Material> _batchMaterialCache = new Dictionary<SpriteSharedComponent, Material>();
 
         private readonly Matrix4x4[] _batchMatrixCache = new Matrix4x4[BATCH_SIZE];
-        private readonly Dictionary<SpriteSharedData, Mesh> _batchMeshCache = new Dictionary<SpriteSharedData, Mesh>();
+        private readonly Dictionary<SpriteSharedComponent, Mesh> _batchMeshCache = new Dictionary<SpriteSharedComponent, Mesh>();
         private readonly Vector4[] _batchUvScaleAndOffsetCache = new Vector4[BATCH_SIZE];
-        private readonly List<SpriteSharedData> _uniqueSpriteData = new List<SpriteSharedData>();
+        private readonly List<SpriteSharedComponent> _uniqueSpriteData = new List<SpriteSharedComponent>();
 
         private EntityQuery _uniqueSpriteQuery;
 
         protected override void OnCreate()
         {
             _uniqueSpriteQuery = GetEntityQuery(
-                typeof(SpriteSharedData),
+                typeof(SpriteSharedComponent),
                 typeof(SpriteComponent),
                 typeof(LocalToWorld));
         }
@@ -37,7 +39,7 @@ namespace BulletHell.ECS.Systems
         {
             EntityManager.GetAllUniqueSharedComponentData(_uniqueSpriteData);
 
-            foreach (SpriteSharedData uniqueSpriteData in _uniqueSpriteData)
+            foreach (SpriteSharedComponent uniqueSpriteData in _uniqueSpriteData)
             {
                 if (uniqueSpriteData.textureId == TextureId.None) continue;
                 
@@ -59,17 +61,17 @@ namespace BulletHell.ECS.Systems
                 NativeArray<Vector4> uvScaleAndOffsets = new NativeArray<Vector4>(entitiesWithUniqueSpriteCount, Allocator.TempJob);
 
                 // needed to avoid burst compilation error involving duplicate variable names
-                SpriteSharedData sharedDataCopy = uniqueSpriteData;
+                SpriteSharedComponent sharedComponentCopy = uniqueSpriteData;
 
                 Entities.WithSharedComponentFilter(uniqueSpriteData).ForEach((
                     int entityInQueryIndex,
                     in SpriteComponent sprite,
                     in LocalToWorld localToWorld) =>
                 {
-                    if (sharedDataCopy.spriteOriginOffset.x != 0 && sharedDataCopy.spriteOriginOffset.y != 0)
+                    if (sharedComponentCopy.spriteOriginOffset.x != 0 || sharedComponentCopy.spriteOriginOffset.y != 0)
                     {
-                        float3 originOffset = new float3(sharedDataCopy.spriteOriginOffset.x, sharedDataCopy.spriteOriginOffset.y, 0f);
-                        float3 position = localToWorld.Position + originOffset / GameConstants.PPU;
+                        float3 originOffset = new float3(sharedComponentCopy.spriteOriginOffset.x, sharedComponentCopy.spriteOriginOffset.y, 0f);
+                        float3 position = localToWorld.Position - originOffset / GameConstants.PPU;
                         quaternion rotation = localToWorld.Rotation;
                         float3 scale = localToWorld.Value.GetScale();
 
@@ -79,8 +81,8 @@ namespace BulletHell.ECS.Systems
                         matrices[entityInQueryIndex] = localToWorld.Value;
                     
                     float2 uvScalePerColumnRow = new float2(
-                        1f / sharedDataCopy.spriteSheetColumnsRows.x,
-                        1f / sharedDataCopy.spriteSheetColumnsRows.y);
+                        1f / sharedComponentCopy.spriteSheetColumnsRows.x,
+                        1f / sharedComponentCopy.spriteSheetColumnsRows.y);
 
                     uvScaleAndOffsets[entityInQueryIndex] = new Vector4
                     {
@@ -113,17 +115,17 @@ namespace BulletHell.ECS.Systems
             _uniqueSpriteData.Clear();
         }
 
-        private Mesh CreateAndAddMeshToCache(in SpriteSharedData spriteData, in Texture2D texture)
+        private Mesh CreateAndAddMeshToCache(in SpriteSharedComponent spriteComponent, in Texture2D texture)
         {
-            Mesh mesh = CreateQuadFromTexture(texture, spriteData.spriteSheetColumnsRows);
-            _batchMeshCache.Add(spriteData, mesh);
+            Mesh mesh = CreateQuadFromTexture(texture, spriteComponent.spriteSheetColumnsRows);
+            _batchMeshCache.Add(spriteComponent, mesh);
             return mesh;
         }
 
-        private Material CreateAndAddMaterialToCache(in SpriteSharedData spriteData, in Texture2D texture)
+        private Material CreateAndAddMaterialToCache(in SpriteSharedComponent spriteComponent, in Texture2D texture)
         {
             Material material = CreateMaterialFromTexture(texture);
-            _batchMaterialCache.Add(spriteData, material);
+            _batchMaterialCache.Add(spriteComponent, material);
             return material;
         }
 

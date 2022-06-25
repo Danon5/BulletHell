@@ -1,10 +1,13 @@
 ﻿using BulletHell.ECS.Components;
+using BulletHell.ECS.SystemGroups;
 using Unity.Entities;
 using Unity.Mathematics;
 using Unity.Transforms;
 
 namespace BulletHell.ECS.Systems
 {
+    [UpdateInGroup(typeof(PhysicsSystemGroup))]
+    [UpdateBefore(typeof(CollisionResolutionSystem))]
     public partial class RigidbodyMovementSystem : SystemBase
     {
         protected override void OnUpdate()

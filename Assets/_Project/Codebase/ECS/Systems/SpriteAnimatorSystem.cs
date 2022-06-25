@@ -1,26 +1,28 @@
 ﻿using System.Collections.Generic;
 using BulletHell.Animation;
 using BulletHell.ECS.Components;
-using BulletHell.ECS.SharedData;
+using BulletHell.ECS.SharedComponents;
+using BulletHell.ECS.SystemGroups;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
 
 namespace BulletHell.ECS.Systems
 {
+    [UpdateInGroup(typeof(RenderingSystemGroup))]
     [UpdateBefore(typeof(SpriteRenderSystem))]
     public partial class SpriteAnimatorSystem : SystemBase
     {
-        private readonly Dictionary<SpriteAnimationSharedData, AnimationData> _batchAnimationDataCache =
-            new Dictionary<SpriteAnimationSharedData, AnimationData>();
+        private readonly Dictionary<SpriteAnimationSharedComponent, AnimationData> _batchAnimationDataCache =
+            new Dictionary<SpriteAnimationSharedComponent, AnimationData>();
 
-        private readonly List<SpriteAnimationSharedData> _uniqueAnimationData = new List<SpriteAnimationSharedData>();
+        private readonly List<SpriteAnimationSharedComponent> _uniqueAnimationData = new List<SpriteAnimationSharedComponent>();
 
         protected override void OnUpdate()
         {
             EntityManager.GetAllUniqueSharedComponentData(_uniqueAnimationData);
 
-            foreach (SpriteAnimationSharedData uniqueAnimationData in _uniqueAnimationData)
+            foreach (SpriteAnimationSharedComponent uniqueAnimationData in _uniqueAnimationData)
             {
                 if (uniqueAnimationData.animationId == AnimationId.None) continue;
                 

@@ -1,99 +1,166 @@
-﻿using BulletHell.ECS.Components;
+﻿using BulletHell.ECS.BufferElements;
+using BulletHell.ECS.Components;
+using BulletHell.ECS.SystemGroups;
 using Unity.Collections;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Physics;
 using Unity.Transforms;
-using UnityEngine;
 
 namespace BulletHell.ECS.Systems
 {
-    [UpdateAfter(typeof(RigidbodyMovementSystem))]
+    [UpdateInGroup(typeof(PhysicsSystemGroup))]
     public partial class CollisionResolutionSystem : SystemBase
     {
         private EntityQuery _circleColliderQuery;
+        private EndSimulationEntityCommandBufferSystem _endSimulationEntityCommandBufferSystem;
 
         protected override void OnCreate()
         {
             _circleColliderQuery = EntityManager.CreateEntityQuery(
                 typeof(Translation),
                 typeof(RigidbodyComponent),
-                typeof(CircleColliderComponent));
+                typeof(ColliderComponent));
+
+            _endSimulationEntityCommandBufferSystem = World.GetOrCreateSystem<EndSimulationEntityCommandBufferSystem>();
         }
 
         protected override void OnUpdate()
         {
-            int circleColliderCount = _circleColliderQuery.CalculateEntityCount();
+            int colliderCount = _circleColliderQuery.CalculateEntityCount();
+            NativeArray<EntityCollider> colliders = new NativeArray<EntityCollider>(colliderCount, Allocator.TempJob);
+            NativeQueue<EntityCollision> collisions = new NativeQueue<EntityCollision>(Allocator.TempJob);
 
-            NativeArray<CircleCollider> circleColliders = new NativeArray<CircleCollider>(circleColliderCount, Allocator.TempJob);
+            EntityCommandBuffer commandBuffer = _endSimulationEntityCommandBufferSystem.CreateCommandBuffer();
 
-            Entities.ForEach((
+            Entities.WithAll<RigidbodyComponent>().ForEach((
+                Entity entity,
                 int entityInQueryIndex,
                 in Translation translation,
-                in RigidbodyComponent rigidbody,
-                in CircleColliderComponent circleCollider) =>
+                in ColliderComponent collider) =>
             {
-                circleColliders[entityInQueryIndex] = new CircleCollider
+                colliders[entityInQueryIndex] = new EntityCollider
                 {
+                    entity = entity,
+                    colliderType = collider.colliderType,
+                    isTrigger = collider.isTrigger,
+                    tracksCollisions = collider.tracksCollisions,
                     position = new float2(translation.Value.x, translation.Value.y),
-                    radius = circleCollider.radius
+                    circleColliderRadius = collider.circleColliderRadius
                 };
             }).Schedule();
-            
+
             Dependency.Complete();
-            
-            Entities.ForEach((
+
+            Entities.WithAll<Translation, RigidbodyComponent>().ForEach((
                 int entityInQueryIndex,
-                in Translation translation,
-                in RigidbodyComponent rigidbody,
-                in CircleColliderComponent circleCollider) =>
+                in ColliderComponent collider) =>
             {
-                CircleCollider a = circleColliders[entityInQueryIndex];
-                
-                for (int i = 0; i < circleColliderCount; i++)
+                EntityCollider colA = colliders[entityInQueryIndex];
+
+                for (int i = 0; i < colliderCount; i++)
                 {
                     if (i == entityInQueryIndex) continue;
 
-                    CircleCollider b = circleColliders[i];
-                    
-                    float totalRadius = a.radius + b.radius;
-                    float2 diff = b.position - a.position;
+                    EntityCollider colB = colliders[i];
 
-                    if (AreCirclesColliding(a, b, totalRadius, diff))
-                        ResolveCircleCollision(ref a, ref b, totalRadius, diff);
+                    if (colA.colliderType == ColliderType.Circle && colB.colliderType == ColliderType.Circle)
+                    {
+                        float totalRadius = colA.circleColliderRadius + colB.circleColliderRadius;
+                        float2 positionDiff = colB.position - colA.position;
 
-                    circleColliders[i] = b;
+                        if (AreCirclesColliding(colA, colB, totalRadius, positionDiff))
+                        {
+                            if (collider.tracksCollisions)
+                            {
+                                collisions.Enqueue(new EntityCollision
+                                {
+                                    collider = colA,
+                                    otherCollider = colB
+                                });
+                            }
+
+                            if (!colA.isTrigger && !colB.isTrigger)
+                                ResolveCircleCollision(ref colA, ref colB, totalRadius, positionDiff);
+                        }
+                    }
+
+                    colliders[i] = colB;
                 }
-                
-                circleColliders[entityInQueryIndex] = a;
+
+                colliders[entityInQueryIndex] = colA;
             }).Schedule();
-            
+
             Dependency.Complete();
-            
-            Entities.ForEach((
+
+            Entities.WithAll<RigidbodyComponent, ColliderComponent>().ForEach((
                 int entityInQueryIndex,
-                ref Translation translation,
-                in RigidbodyComponent rigidbody,
-                in CircleColliderComponent circleCollider) =>
+                ref Translation translation) =>
             {
-                CircleCollider resolvedCollider = circleColliders[entityInQueryIndex];
+                EntityCollider resolvedCollider = colliders[entityInQueryIndex];
                 translation.Value = new float3(resolvedCollider.position.x, resolvedCollider.position.y, 0f);
             }).Schedule();
+
+            Dependency.Complete();
+
+            Entities.WithStructuralChanges().ForEach((
+                Entity entity,
+                in ColliderComponent circleCollider) =>
+            {
+                bool collisionTrackStateHasChanged = circleCollider.tracksCollisions !=
+                                                     EntityManager.HasComponent<EntityCollisionBufferElement>(entity);
+
+                if (!collisionTrackStateHasChanged) return;
+                
+                if (circleCollider.tracksCollisions)
+                    EntityManager.AddBuffer<EntityCollisionBufferElement>(entity);
+                else
+                    EntityManager.RemoveComponent<EntityCollisionBufferElement>(entity);
+            }).WithoutBurst().Run();
+
+            Entities.WithAll<EntityCollisionBufferElement>().ForEach((
+                Entity entity) =>
+            {
+                commandBuffer.SetBuffer<EntityCollisionBufferElement>(entity);
+            }).Schedule();
             
             Dependency.Complete();
 
-            circleColliders.Dispose();
+            while (collisions.TryDequeue(out EntityCollision collision))
+            {
+                Entity entity = collision.collider.entity;
+
+                EntityManager.GetBuffer<EntityCollisionBufferElement>(entity).Add(new EntityCollisionBufferElement
+                {
+                    collision = new EntityCollisionData
+                    {
+                        other = collision.otherCollider.entity,
+                        point = default,
+                        normal = default
+                    }
+                });
+            }
+
+            Dependency.Complete();
+            
+            colliders.Dispose();
+            collisions.Dispose();
         }
 
-        private static bool AreCirclesColliding(in CircleCollider a, in CircleCollider b, in float totalRadius, in float2 diff)
+        private static bool AreCirclesColliding(in EntityCollider a, in EntityCollider b, in float totalRadius, in float2 diff)
         {
-            
             return totalRadius * totalRadius > diff.x * diff.x + diff.y * diff.y;
         }
 
-        private static void ResolveCircleCollision(ref CircleCollider a, ref CircleCollider b, in float totalRadius, in float2 diff)
+        private static void ResolveCircleCollision(ref EntityCollider a, ref EntityCollider b, in float totalRadius, in float2 diff)
         {
             float diffMag = math.length(diff);
+
+            if (diffMag == 0f)
+            {
+                b.position += new float2(0f, 1f) * .001f;
+                return;
+            }
+            
             float2 normal = diff / diffMag;
             float overlapDist = totalRadius - diffMag;
             float depenetration = overlapDist / 2f;
@@ -102,10 +169,20 @@ namespace BulletHell.ECS.Systems
             b.position += normal * depenetration;
         }
 
-        private struct CircleCollider
+        private struct EntityCollider
         {
+            public Entity entity;
+            public ColliderType colliderType;
+            public bool isTrigger;
+            public bool tracksCollisions;
             public float2 position;
-            public float radius;
+            public float circleColliderRadius;
+        }
+
+        private struct EntityCollision
+        {
+            public EntityCollider collider;
+            public EntityCollider otherCollider;
         }
     }
 }

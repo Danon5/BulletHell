@@ -1,11 +1,12 @@
 ﻿using BulletHell.ECS.Components;
+using BulletHell.ECS.SystemGroups;
 using BulletHell.ECS.Tags;
 using Unity.Entities;
 using Unity.Mathematics;
-using Unity.Transforms;
 
 namespace BulletHell.ECS.Systems
 {
+    [UpdateInGroup(typeof(RenderingSystemGroup))]
     [UpdateBefore(typeof(SpriteRenderSystem))]
     public partial class SpriteAutoFlipXSystem : SystemBase
     {

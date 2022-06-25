@@ -1,8 +1,9 @@
 ﻿using System.Text;
+using JetBrains.Annotations;
 using Unity.Profiling;
 using UnityEngine;
 
-namespace BulletHell.DevelopmentTools
+namespace BulletHell.Development
 {
     public sealed class GameProfiler : MonoBehaviour
     {
@@ -13,6 +14,7 @@ namespace BulletHell.DevelopmentTools
         private string _statsText;
         private ProfilerRecorder _systemMemoryRecorder;
 
+        [UsedImplicitly]
         private void Update()
         {
             double frameTime = GetRecorderFrameAverage(_mainThreadTimeRecorder) * 1e-6f;
@@ -25,6 +27,7 @@ namespace BulletHell.DevelopmentTools
             _statsText = sb.ToString();
         }
 
+        [UsedImplicitly]
         private void OnEnable()
         {
             _systemMemoryRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Memory, "System Used Memory");
@@ -32,6 +35,7 @@ namespace BulletHell.DevelopmentTools
             _mainThreadTimeRecorder = ProfilerRecorder.StartNew(ProfilerCategory.Internal, "Main Thread", 15);
         }
 
+        [UsedImplicitly]
         private void OnDisable()
         {
             _systemMemoryRecorder.Dispose();
@@ -39,6 +43,7 @@ namespace BulletHell.DevelopmentTools
             _mainThreadTimeRecorder.Dispose();
         }
 
+        [UsedImplicitly]
         private void OnGUI()
         {
             GUI.Box(new Rect(25, 25, _boxSize.x, _boxSize.y), _statsText, _boxStyle);

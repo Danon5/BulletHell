@@ -1,11 +1,12 @@
 ﻿using BulletHell.ECS.Components;
+using BulletHell.ECS.SystemGroups;
 using Unity.Entities;
 using Unity.Transforms;
 using UnityEngine;
 
 namespace BulletHell.ECS.Systems.PlayerSystems
 {
-    [UpdateBefore(typeof(RigidbodyMovementSystem))]
+    [UpdateInGroup(typeof(GameplaySystemGroup))]
     public partial class PlayerMovementSystem : SystemBase
     {
         protected override void OnUpdate()

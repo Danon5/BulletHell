@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using BulletHell.Animation;
+using JetBrains.Annotations;
 using UnityEngine;
 
 namespace BulletHell
@@ -20,7 +21,15 @@ namespace BulletHell
         private readonly Dictionary<TextureId, Texture2D> _textureDict = new Dictionary<TextureId, Texture2D>();
 
         public static Material TestMaterial => _singleton._testMaterial;
+        
+        [UsedImplicitly]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
+        private static void InitializeOnLoad()
+        {
+            _singleton = null;
+        }
 
+        [UsedImplicitly]
         private void Awake()
         {
             _singleton = this;
@@ -31,13 +40,7 @@ namespace BulletHell
             foreach (AnimationData animationData in _animationData)
                 _animationDataDict.Add(animationData.AnimationId, animationData);
         }
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
-        private static void InitializeOnLoad()
-        {
-            _singleton = null;
-        }
-
+        
         public static Texture2D GetTexture(in TextureId id)
         {
             return _singleton._textureDict[id];

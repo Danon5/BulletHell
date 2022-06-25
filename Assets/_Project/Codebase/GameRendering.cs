@@ -19,6 +19,7 @@ namespace BulletHell
         private RenderTexture _pixelationRenderTexture;
         private float _previousOrthographicSize;
 
+        [UsedImplicitly]
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
         private static void InitializeOnLoad()
         {
@@ -29,6 +30,9 @@ namespace BulletHell
         private void Awake()
         {
             _singleton = this;
+            
+            Application.targetFrameRate = GameConstants.TARGET_FRAMERATE;
+            QualitySettings.vSyncCount = 0;
             
             UpdatePixelationCamera();
         }
