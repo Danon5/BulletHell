@@ -2,7 +2,7 @@
 
 namespace BulletHell.ECS.SystemGroups
 {
-    [UpdateAfter((typeof(PhysicsSystemGroup)))]
+    [UpdateAfter((typeof(PostPhysicsSystemGroup)))]
     public class RenderingSystemGroup : ComponentSystemGroup
     {
         

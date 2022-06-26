@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace BulletHell.ECS.Systems.PlayerSystems
 {
-    [UpdateInGroup(typeof(GameplaySystemGroup))]
+    [UpdateInGroup(typeof(PrePhysicsSystemGroup))]
     public partial class PlayerMovementSystem : SystemBase
     {
         protected override void OnUpdate()

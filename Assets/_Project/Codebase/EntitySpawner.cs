@@ -47,6 +47,16 @@ namespace BulletHell
                 tracksCollisions = true,
                 circleColliderRadius = .5f
             });
+            _entityManager.AddComponentData(playerEntity, new HealthComponent
+            {
+                invincible = false,
+                maxHealth = 5,
+                health = 5
+            });
+            _entityManager.AddSharedComponentData(playerEntity, new TeamSharedComponent
+            {
+                teamId = TeamId.Friendly
+            });
             _entityManager.AddSharedComponentData(playerEntity, new SpriteSharedComponent
             {
                 textureId = TextureId.Character_Havoc_Default,
@@ -73,6 +83,16 @@ namespace BulletHell
                 isTrigger = false,
                 tracksCollisions = true,
                 circleColliderRadius = 1f
+            });
+            _entityManager.AddComponentData(enemyEntity, new HealthComponent
+            {
+                invincible = false,
+                maxHealth = 100,
+                health = 100
+            });
+            _entityManager.AddSharedComponentData(enemyEntity, new TeamSharedComponent
+            {
+                teamId = TeamId.Enemy
             });
             _entityManager.AddSharedComponentData(enemyEntity, new SpriteSharedComponent
             {

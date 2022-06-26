@@ -4,6 +4,6 @@ namespace BulletHell.ECS.BufferElements
 {
     public struct EntityCollisionBufferElement : IBufferElementData
     {
-        public EntityCollisionData collision;
+        public EntityCollisionData value;
     }
 }

@@ -7,7 +7,7 @@ using Unity.Transforms;
 
 namespace BulletHell.ECS.Systems.EnemySystems
 {
-    [UpdateInGroup(typeof(GameplaySystemGroup))]
+    [UpdateInGroup(typeof(PrePhysicsSystemGroup))]
     public partial class EnemyMovementSystem : SystemBase
     {
         protected override void OnUpdate()
@@ -19,7 +19,16 @@ namespace BulletHell.ECS.Systems.EnemySystems
             NativeArray<Entity> aggroTargets = aggroQuery.ToEntityArray(Allocator.Temp);
 
             if (aggroTargets.Length == 0)
+            {
+                Entities.ForEach((
+                    ref Translation translation,
+                    ref RigidbodyComponent rigidbody,
+                    in EnemyComponent enemy) =>
+                {
+                    rigidbody.velocity = float2.zero;
+                }).ScheduleParallel();
                 return;
+            }
 
             Entity aggroTarget = aggroTargets[0];
             Translation aggroTargetTranslation = EntityManager.GetComponentData<Translation>(aggroTarget);

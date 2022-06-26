@@ -1,5 +1,4 @@
-﻿using BulletHell.ECS.BufferElements;
-using BulletHell.ECS.Components;
+﻿using BulletHell.ECS.Components;
 using BulletHell.ECS.SystemGroups;
 using Unity.Entities;
 using Unity.Transforms;
@@ -7,7 +6,7 @@ using UnityEngine;
 
 namespace BulletHell.ECS.Systems
 {
-    [UpdateInGroup(typeof(RenderingSystemGroup))]
+    [UpdateInGroup(typeof(PostPhysicsSystemGroup))]
     public partial class CameraFollowSystem : SystemBase
     {
         private Transform _cameraTransform;

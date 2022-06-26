@@ -131,7 +131,7 @@ namespace BulletHell.ECS.Systems
 
                 EntityManager.GetBuffer<EntityCollisionBufferElement>(entity).Add(new EntityCollisionBufferElement
                 {
-                    collision = new EntityCollisionData
+                    value = new EntityCollisionData
                     {
                         other = collision.otherCollider.entity,
                         point = default,

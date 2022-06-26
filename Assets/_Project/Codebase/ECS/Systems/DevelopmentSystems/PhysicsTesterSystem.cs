@@ -7,7 +7,7 @@ using UnityEngine;
 
 namespace BulletHell.ECS.Systems.DevelopmentSystems
 {
-    [UpdateInGroup(typeof(GameplaySystemGroup))]
+    [UpdateInGroup(typeof(PrePhysicsSystemGroup))]
     public partial class PhysicsTesterSystem : SystemBase
     {
         protected override void OnUpdate()

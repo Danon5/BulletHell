@@ -70,7 +70,8 @@ namespace BulletHell.ECS.Systems
                 {
                     if (sharedComponentCopy.spriteOriginOffset.x != 0 || sharedComponentCopy.spriteOriginOffset.y != 0)
                     {
-                        float3 originOffset = new float3(sharedComponentCopy.spriteOriginOffset.x, sharedComponentCopy.spriteOriginOffset.y, 0f);
+                        float3 originOffset = new float3(sharedComponentCopy.spriteOriginOffset.x, 
+                            sharedComponentCopy.spriteOriginOffset.y, 0f);
                         float3 position = localToWorld.Position - originOffset / GameConstants.PPU;
                         quaternion rotation = localToWorld.Rotation;
                         float3 scale = localToWorld.Value.GetScale();

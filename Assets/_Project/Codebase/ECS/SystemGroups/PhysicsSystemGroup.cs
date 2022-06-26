@@ -1,8 +1,9 @@
 ﻿using Unity.Entities;
+using Unity.Transforms;
 
 namespace BulletHell.ECS.SystemGroups
 {
-    [UpdateAfter((typeof(GameplaySystemGroup)))]
+    [UpdateBefore(typeof(TransformSystemGroup))]
     public sealed class PhysicsSystemGroup : ComponentSystemGroup
     {
         
